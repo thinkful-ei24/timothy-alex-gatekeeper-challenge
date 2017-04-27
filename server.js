@@ -35,13 +35,17 @@ const USERS = [
   {id: 4,
    firstName: 'Freddy',
    lastName: 'Fun',
-   userName: 'freddy@business.com'
+   userName: 'freddy@business.com',
    position: 'Community Manager',
    isAdmin: false,
    // NEVER EVER EVER store passwords in plain text in real life. NEVER!!!!!!!!!!!
    password: 'password'
   } 
 ];
+
+function getUserNameFromHeader(header) {
+  
+}
 
 const mkAdminOnlyMiddleware = (users) => {
   return function adminOnly(req, res, next) {

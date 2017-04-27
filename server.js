@@ -46,11 +46,14 @@ const USERS = [
 ];
 
 
-function has
-function isAdminUser(userName, password, users) {
-  if (!users.find((user, index) => user.userName === userName)) {
-    return false
-  }
+function hasValidLoginCredentials(userName, password, users) {
+  return users.filter(
+    (user, index) => user.userName === userName && user.password === password)
+    .length === 1;
+}
+
+function isAdminUser(userName, users) {
+  return users.filter((user, index) => user.userName === userName && user.isAdmin).length === 1;
 }
 
 const mkAdminOnlyMiddleware = (users) => {
@@ -58,10 +61,12 @@ const mkAdminOnlyMiddleware = (users) => {
     console.log(req.get('x-username-and-password'));
     const {user, pass} = Object.assign(
       {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
-    if (!(user && pass)) {
-      return res.status(401).send('Must provide credentials');
+    if (!hasValidLoginCredentials(user, pass, users)) {
+      return res.status(401).json({message: 'Must provide valid credentials'});
     }
-    isAdminUser(user, pass, users);
+    if (!isAdminUser(user, users)) {
+      return res.status(403).json({message: 'Unauthorized'});
+    }
     next();
   }
 }  

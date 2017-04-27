@@ -46,13 +46,22 @@ const USERS = [
 ];
 
 
+function has
+function isAdminUser(userName, password, users) {
+  if (!users.find((user, index) => user.userName === userName)) {
+    return false
+  }
+}
+
 const mkAdminOnlyMiddleware = (users) => {
   return function adminOnly(req, res, next) {
-    console.log('here');
     console.log(req.get('x-username-and-password'));
     const {user, pass} = Object.assign(
       {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
-    console.log(user, pass)
+    if (!(user && pass)) {
+      return res.status(401).send('Must provide credentials');
+    }
+    isAdminUser(user, pass, users);
     next();
   }
 }  

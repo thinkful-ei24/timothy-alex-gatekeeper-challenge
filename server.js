@@ -45,43 +45,23 @@ const USERS = [
   } 
 ];
 
-
-function hasValidLoginCredentials(userName, password, users) {
-  return users.filter(
-    (user, index) => user.userName === userName && user.password === password)
-    .length === 1;
-}
-
-function isAdminUser(userName, users) {
-  return users.filter((user, index) => user.userName === userName && user.isAdmin).length === 1;
-}
-
-function adminOnly(req, res, next) {
-  console.log(req.get('x-username-and-password'));
+function getAuthedUser(req, res, next) {
   const {user, pass} = Object.assign(
     {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
-  if (!hasValidLoginCredentials(user, pass, USERS)) {
-    return res.status(401).json({message: 'Must provide valid credentials'});
-  }
-  if (!isAdminUser(user, USERS)) {
-    return res.status(403).json({message: 'Unauthorized'});
-  }
+  req.user = USERS.find(
+    (usr, index) => usr.userName === user && usr.password === pass);
   next();
 }
   
 
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", (req, res) => {
-  res.sendFile(`${__dirname}/views/index.html`);
-});
+app.use('/api/admin', adminOnly);
 
-app.use('/admin', adminOnly);
-
-app.get("/admin/", (req, res) => {
+app.get("/api/admin/", (req, res) => {
   res.sendFile(`${__dirname}/views/admin-dashboard.html`);
 });
 
 app.get("/admin/api/users", (req, res) => res.json(USERS.map((user, index) => {
+  console.log(`${req.user} accessing req.url`);
   return {
     firstName: user.firstName,
     lastName: user.lastName,

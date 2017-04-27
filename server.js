@@ -19,7 +19,7 @@ const USERS = [
   {id: 2,
    firstName: 'Sally',
    lastName: 'Student',
-   userName: 'joeschmoe@business.com',
+   userName: 'sallystudent@business.com',
    position: 'Jr. Engineer',
    isAdmin: true,
    // NEVER EVER EVER store passwords in plain text in real life. NEVER!!!!!!!!!!!
@@ -71,18 +71,26 @@ const mkAdminOnlyMiddleware = (users) => {
   }
 }  
 
-app.use(mkAdminOnlyMiddleware(USERS));
-
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/views/index.html`);
 });
 
+app.use('/admin', mkAdminOnlyMiddleware(USERS));
+
 app.get("/admin/", (req, res) => {
   res.sendFile(`${__dirname}/views/admin-dashboard.html`);
 });
 
-app.get("/admin/api/users", (req, res) => res.json(USERS));
+app.get("/admin/api/users", (req, res) => res.json(USERS.map((user, index) => {
+  return {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    id: user.id,
+    userName: user.userName,
+    position: user.position
+  };
+})));
 
 app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${process.env.PORT}`);

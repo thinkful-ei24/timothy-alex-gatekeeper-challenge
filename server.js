@@ -56,27 +56,26 @@ function isAdminUser(userName, users) {
   return users.filter((user, index) => user.userName === userName && user.isAdmin).length === 1;
 }
 
-const mkAdminOnlyMiddleware = (users) => {
-  return function adminOnly(req, res, next) {
-    console.log(req.get('x-username-and-password'));
-    const {user, pass} = Object.assign(
-      {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
-    if (!hasValidLoginCredentials(user, pass, users)) {
-      return res.status(401).json({message: 'Must provide valid credentials'});
-    }
-    if (!isAdminUser(user, users)) {
-      return res.status(403).json({message: 'Unauthorized'});
-    }
-    next();
+function adminOnly(req, res, next) {
+  console.log(req.get('x-username-and-password'));
+  const {user, pass} = Object.assign(
+    {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
+  if (!hasValidLoginCredentials(user, pass, USERS)) {
+    return res.status(401).json({message: 'Must provide valid credentials'});
   }
-}  
+  if (!isAdminUser(user, USERS)) {
+    return res.status(403).json({message: 'Unauthorized'});
+  }
+  next();
+}
+  
 
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", (req, res) => {
   res.sendFile(`${__dirname}/views/index.html`);
 });
 
-app.use('/admin', mkAdminOnlyMiddleware(USERS));
+app.use('/admin', adminOnly);
 
 app.get("/admin/", (req, res) => {
   res.sendFile(`${__dirname}/views/admin-dashboard.html`);

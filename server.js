@@ -45,31 +45,25 @@ const USERS = [
   } 
 ];
 
-function getAuthedUser(req, res, next) {
+function gateKeeper(req, res, next) {
   const {user, pass} = Object.assign(
     {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
   req.user = USERS.find(
     (usr, index) => usr.userName === user && usr.password === pass);
+  console.log('inmiddlewareland');
   next();
 }
   
+app.use(gateKeeper);
 
-app.use('/api/admin', adminOnly);
 
-app.get("/api/admin/", (req, res) => {
-  res.sendFile(`${__dirname}/views/admin-dashboard.html`);
+app.get("/api/users/me", (req, res) => {
+  if (req.user === undefined) {
+    return res.status(403).json({message: 'Must supply valid user credentials'});
+  }
+  const {firstName, lastName, id, userName, position} = req.user;
+  return res.json({firstName, lastName, id, userName, position});
 });
-
-app.get("/admin/api/users", (req, res) => res.json(USERS.map((user, index) => {
-  console.log(`${req.user} accessing req.url`);
-  return {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    id: user.id,
-    userName: user.userName,
-    position: user.position
-  };
-})));
 
 app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${process.env.PORT}`);

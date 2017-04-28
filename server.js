@@ -1,10 +1,6 @@
 const express = require('express');
-const queryString = require('query-string');
 
 const app = express();
-
-
-app.use(express.static('public'));
 
 const USERS = [
   {id: 1,
@@ -42,25 +38,19 @@ const USERS = [
    isAdmin: false,
    // NEVER EVER EVER store passwords in plain text in real life. NEVER!!!!!!!!!!!
    password: 'password'
-  } 
+  }
 ];
 
-function gateKeeper(req, res, next) {
-  const {user, pass} = Object.assign(
-    {user: null, pass: null}, queryString.parse(req.get('x-username-and-password')));
-  req.user = USERS.find(
-    (usr, index) => usr.userName === user && usr.password === pass);
-  console.log('inmiddlewareland');
-  next();
-}
-  
-app.use(gateKeeper);
 
 
 app.get("/api/users/me", (req, res) => {
+  // send an error message if no or wrong credentials sent
   if (req.user === undefined) {
     return res.status(403).json({message: 'Must supply valid user credentials'});
   }
+  // we're only returning a subset of the properties
+  // from the user object. Notably, we're *not*
+  // sending `password` or `isAdmin`.
   const {firstName, lastName, id, userName, position} = req.user;
   return res.json({firstName, lastName, id, userName, position});
 });

@@ -2,6 +2,18 @@ const express = require('express');
 
 const app = express();
 
+// For this challenge, we're hard coding a list of users, because
+// we haven't learned about databases yet. Normally, you'd store
+// user data in a database, and query the database to find
+// a particular user.
+//
+// ALSO, for this challenge, we're storing user passwords as
+// plain text. This is something you should NEVER EVER EVER 
+// do in a real app. Instead, always use cryptographic
+// password hashing best practices (aka, the tried and true
+// ways to keep user passwords as secure as possible).
+// You can learn mroe about password hashing later
+// here: https://crackstation.net/hashing-security.htm
 const USERS = [
   {id: 1,
    firstName: 'Joe',
@@ -42,6 +54,16 @@ const USERS = [
 ];
 
 
+// write a `gateKeeper` middleware function that:
+//  1. looks for a 'x-username-and-password' request header
+//  2. parses the 
+function gateKeeper(req, res, next) {
+  // your code should replace the line below
+  next();
+}
+
+
+app.use(gateKeeper);
 
 app.get("/api/users/me", (req, res) => {
   // send an error message if no or wrong credentials sent
